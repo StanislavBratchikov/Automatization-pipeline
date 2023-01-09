@@ -8,7 +8,7 @@ Pipeline was inspired by  [this paper](https://pubmed.ncbi.nlm.nih.gov/25378466/
 that has introduced the flowDensity algorithm that 
 > facilitates reproducible, high-throughput analysis of flow cytometry data by automating a predefined manual gating approach
 
-It [performed](./'Papers and refs'/'20220627 PASC BAL flow.pdf') best in `flowCAP-III` competition.
+It [performed](./Papers and refs/20220627 PASC BAL flow.pdf) best in `flowCAP-III` competition.
 
 
 Algorithm is based on estimation of regions surrounding cell populations via
