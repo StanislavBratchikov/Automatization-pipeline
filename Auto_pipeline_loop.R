@@ -1,7 +1,12 @@
-# cwd_0 <- getwd()
-# newdir <- "SCRIPT_pipeline"
-# dir.create(newdir)
-setwd(paste0(cwd_0, "/SCRIPT_pipeline"))
+library(flowCore)
+library(flowDensity)
+library(flowViz)
+library(flowWorkspace)
+cwd_0 <- "/Users/mgj1343/Automatization-pipeline"
+setwd(cwd_0)
+newdir <- "SCRIPT_pipeline"
+dir.create(newdir)
+setwd("./SCRIPT_pipeline/")
 fcs_names <- dir(path = "/Users/mgj1343/Library/CloudStorage/OneDrive-NorthwesternUniversity/FCS Automatization data/data/", pattern = ".fcs$", full.names = FALSE, ignore.case = TRUE)
 for (i in fcs_names) {
   newdir <- i
@@ -28,6 +33,8 @@ for (i in fcs_names) {
   ), bty = "n")
   dev.off()
   ### cd45+
+  ### logicle transformation
+  lgcl <- logicleTransform(w = 0.5, t = 262144, m = 4.5)
   trans <- transformList(c("Qdot 655-A", "AmCyan-A"), lgcl)
   after <- transform(sngl@flow.frame, trans)
 
@@ -46,12 +53,11 @@ for (i in fcs_names) {
     paste0("total: ", sngl@cell.count)
   ), bty = "n", text.col = 1)
   dev.off()
-  ### logicle transformation
-  lgcl <- logicleTransform(w = 0.5, t = 262144, m = 4.5)
+
   trans <- transformList(c("FITC-A", "FSC-A"), lgcl)
   after <- transform(cd45@flow.frame, trans)
   ### Live singlet cells
-  live <- flowDensity(after, channels = c("FITC-A", "FSC-A"), position = c(F, T), upper = c(NA, F))
+  live <- flowDensity(after, channels = c("FITC-A", "FSC-A"), position = c(F, NA), upper = c(NA, F))
   bmp(
     file = "Live.bmp",
     width = 6, height = 4, units = "in", res = 100

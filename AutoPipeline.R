@@ -2,7 +2,7 @@ library(flowCore)
 library(flowDensity)
 library(flowViz)
 library(flowWorkspace)
-fcs_test <- read.FCS("/Users/mgj1343/Library/CloudStorage/OneDrive-NorthwesternUniversity/SBratchikov/FlowDensity/01_data/PASC/02_BAL_flow_cytometry/PASC/20210416 PASC0020/20210416_LC002_001.fcs")
+fcs_test <- read.FCS("/Users/mgj1343/Library/CloudStorage/OneDrive-NorthwesternUniversity/FCS Automatization data/data/20210209_1466-BAL-09_001.fcs")
 ### singlets
 sngl <- flowDensity(fcs_test,
   channels = c("FSC-A", "FSC-H"), position = c(F, F),
@@ -17,6 +17,8 @@ legend("topleft", legend = c(
   paste0("total: ", nrow(sngl@flow.frame))
 ), bty = "n")
 
+### logicle transformation
+lgcl <- logicleTransform(w = 0.5, t = 262144, m = 4.5)
 ### cd45+
 trans <- transformList(c("Qdot 655-A", "AmCyan-A"), lgcl)
 after <- transform(sngl@flow.frame, trans)
@@ -31,8 +33,7 @@ legend("topleft", legend = c(
   paste0("frequency: ", round(cd45@proportion, digits = 2)),
   paste0("total: ", sngl@cell.count)
 ), bty = "n", text.col = 1)
-### logicle transformation
-lgcl <- logicleTransform(w = 0.5, t = 262144, m = 4.5)
+
 trans <- transformList(c("FITC-A", "FSC-A"), lgcl)
 after <- transform(cd45@flow.frame, trans)
 ### Live singlet cells
@@ -46,9 +47,9 @@ legend("topleft", legend = c(
 lines(live@filter, type = "l")
 
 ### cd3+
-lgcl <- estimateLogicle(live@flow.frame, channels = c("PE-A", "PE-Cy7-A"), na.rm = TRUE)
-# trans <- transformList(c("PE-A","PE-Cy7-A"),lgcl)
-after <- transform(live@flow.frame, lgcl)
+# lgcl <- estimateLogicle(live@flow.frame, channels = c("PE-A", "PE-Cy7-A"), na.rm = TRUE)
+trans <- transformList(c("PE-A", "PE-Cy7-A"), lgcl)
+after <- transform(live@flow.frame, trans)
 
 cd3 <- flowDensity(after, channels = c("PE-A", "PE-Cy7-A"), position = c(T, F))
 not_cd3 <- flowDensity(after, channels = c("PE-A", "PE-Cy7-A"), position = c(F, NA))
