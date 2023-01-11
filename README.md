@@ -25,7 +25,6 @@ same gating but for a folder of given fcs files.
 
 __Updates__
   * Modified logical transformation for clearer use
-    * reogj
   * CSV report on identified cells frequencies added for further analysis
   * Loop added to perform whole fcs folder analysis
 
@@ -33,6 +32,11 @@ __Challenges__
   * The smaller population the harder it is to gate it
   * Unable to sort files with 1e7 cells and more (not enough cache)
   * Algorithm fails to stably identify populations in random fcs file
+```[tasklist]
+### Tasks
+- [ ] issue
+- [ ] Draft issue title
+```
 ```
 ## Contributing
 
