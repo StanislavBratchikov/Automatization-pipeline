@@ -2,6 +2,18 @@
 
 This project aims to provide an automatized pipeline for gating cell populations
 in fcs files. 
+## Current updates and challanges 
+
+__Updates__
+- [x] Modified logical transformation for clearer use
+- [x] CSV report on identified cells frequencies added for further analysis
+- [x] Loop added to perform whole fcs folder analysis
+
+__Challenges__
+- [ ] The smaller population the harder it is to gate it
+- [ ] Unable to sort files with 1e7 cells and more (not enough cache)
+- [ ] Algorithm fails to stably identify populations in random fcs file
+
 ## Intro
 
 Pipeline was inspired by  [this paper](https://pubmed.ncbi.nlm.nih.gov/25378466/)
@@ -31,17 +43,6 @@ same gating but for a folder of given fcs files.
 |![bad_example.bmp](./Papers%20and%20refs/bad_example.bmp?raw=true "flowDensity perfomance sneak peak")|
 |:--:|
 |*Example of bad gating of CD8, CD4 using flowDensity and lab's FCSs*|
-## Current updates and challanges 
-
-__Updates__
-- [x] Modified logical transformation for clearer use
-- [x] CSV report on identified cells frequencies added for further analysis
-- [x] Loop added to perform whole fcs folder analysis
-
-__Challenges__
-- [ ] The smaller population the harder it is to gate it
-- [ ] Unable to sort files with 1e7 cells and more (not enough cache)
-- [ ] Algorithm fails to stably identify populations in random fcs file
 
 ```
 ## Contributing
