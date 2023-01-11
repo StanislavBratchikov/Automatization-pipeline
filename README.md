@@ -25,7 +25,7 @@ same gating but for a folder of given fcs files.
 ## Perfomance examples
 ![Alt text](./Papers%20and%20refs/good_gating_example.bmp?raw=true "flowDensity perfomance sneak peak")
 *Example of good gating of Macrophages using flowDensity and lab's FCSs*
-![Alt text](./Papers%20and%20refs/gbad_example_gating.bmp?raw=true "flowDensity perfomance sneak peak")
+![Alt text](./Papers%20and%20refs/bad_example_gating.bmp?raw=true "flowDensity perfomance sneak peak")
 *Example of bad gating of CD8, CD4 using flowDensity and lab's FCSs*
 ## Current updates and challanges 
 
