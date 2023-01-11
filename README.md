@@ -21,10 +21,16 @@ based on [this gating strategy](./Papers%20and%20refs/20220627%20PASC%20BAL%20fl
 [Auto_pipeline_loop.R](./Auto_pipeline_loop.R) provides
 same gating but for a folder of given fcs files.
 
-## Current updates and chalanges 
+## Current updates and challanges 
 
-__underscores__
-
+__Updates__
+..*modified logical transformation for clearer use
+..*csv report on identified cells frequencies added for further analysis
+..*loop added to perform whole fcs folder analysis
+__Challenges__
+..*The smaller population the harder it is to gate it
+..*Unable to sort files with 1e7 cells and more (not enough cache)
+..*Algorithm fails to stably identify populations in random fcs file
 ```
 ## Contributing
 
