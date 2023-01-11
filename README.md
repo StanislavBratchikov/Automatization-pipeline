@@ -24,8 +24,9 @@ based on [this gating strategy](./Papers%20and%20refs/20220627%20PASC%20BAL%20fl
 same gating but for a folder of given fcs files.
 
 ## Perfomance examples
-![good_gating_example.bmp](./Papers%20and%20refs/good_gating_example.bmp?raw=true "flowDensity perfomance sneak peak")
-*Example of good gating of Macrophages using flowDensity and lab's FCSs*
+|![good_gating_example.bmp](./Papers%20and%20refs/good_gating_example.bmp?raw=true "flowDensity perfomance sneak peak")|
+|:--:|
+|*Example of good gating of Macrophages using flowDensity and lab's FCSs*|
 |![bad_example.bmp](./Papers%20and%20refs/bad_example.bmp?raw=true "flowDensity perfomance sneak peak")|
 |:--:|
 |*Example of bad gating of CD8, CD4 using flowDensity and lab's FCSs*|
