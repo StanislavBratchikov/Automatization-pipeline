@@ -24,18 +24,14 @@ same gating but for a folder of given fcs files.
 ## Current updates and challanges 
 
 __Updates__
-  * Modified logical transformation for clearer use
-  * CSV report on identified cells frequencies added for further analysis
-  * Loop added to perform whole fcs folder analysis
+- [x] Modified logical transformation for clearer use
+- [x] CSV report on identified cells frequencies added for further analysis
+- [x] Loop added to perform whole fcs folder analysis
 
 __Challenges__
-  * The smaller population the harder it is to gate it
-  * Unable to sort files with 1e7 cells and more (not enough cache)
-  * Algorithm fails to stably identify populations in random fcs file
-
-## Tasks
-- [ ] issue
-- [ ] Draft issue title
+- [ ] The smaller population the harder it is to gate it
+- [ ] Unable to sort files with 1e7 cells and more (not enough cache)
+- [ ] Algorithm fails to stably identify populations in random fcs file
 
 ```
 ## Contributing
