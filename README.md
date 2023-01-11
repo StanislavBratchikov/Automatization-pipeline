@@ -14,8 +14,9 @@ It [performed](./Papers%20and%20refs/20220627%20PASC%20BAL%20flow.pdf) best in `
 Algorithm is based on estimation of regions surrounding cell populations via
 using such characteristics of the marker density distribution as number, height,
 width of peaks and the slope of a distribution curve. 
-![Alt text](./Papers%20and%20refs/Screen%20Shot%202023-01-09%20at%201.56.02%20PM.png?raw=true "flowDensity perfomance sneak peak")
-*flowDensity perfomance sneak peak*
+|![Paper perfomance of flowDensity](./Papers%20and%20refs/Screen%20Shot%202023-01-09%20at%201.56.02%20PM.png?raw=true)|
+|:--:|
+|*flowDensity perfomance sneak peak*|
 
 [AutoPipeline.R](./AutoPipeline.R) provides full gating of 1 given fcs file 
 based on [this gating strategy](./Papers%20and%20refs/20220627%20PASC%20BAL%20flow.pdf).
@@ -23,10 +24,11 @@ based on [this gating strategy](./Papers%20and%20refs/20220627%20PASC%20BAL%20fl
 same gating but for a folder of given fcs files.
 
 ## Perfomance examples
-![Alt text](./Papers%20and%20refs/good_gating_example.bmp?raw=true "flowDensity perfomance sneak peak")
+![good_gating_example.bmp](./Papers%20and%20refs/good_gating_example.bmp?raw=true "flowDensity perfomance sneak peak")
 *Example of good gating of Macrophages using flowDensity and lab's FCSs*
-![Alt text](./Papers%20and%20refs/bad_example.bmp?raw=true "flowDensity perfomance sneak peak")
-*Example of bad gating of CD8, CD4 using flowDensity and lab's FCSs*
+|![bad_example.bmp](./Papers%20and%20refs/bad_example.bmp?raw=true "flowDensity perfomance sneak peak")|
+|:--:|
+|*Example of bad gating of CD8, CD4 using flowDensity and lab's FCSs*|
 ## Current updates and challanges 
 
 __Updates__
