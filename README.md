@@ -25,7 +25,7 @@ same gating but for a folder of given fcs files.
 
 __Updates__
   * Modified logical transformation for clearer use
-    *reogj
+    * reogj
   * CSV report on identified cells frequencies added for further analysis
   * Loop added to perform whole fcs folder analysis
 
