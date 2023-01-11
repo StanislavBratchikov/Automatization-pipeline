@@ -4,21 +4,24 @@ library(flowViz)
 library(flowWorkspace)
 cwd_0 <- "/Users/mgj1343/Automatization-pipeline"
 setwd(cwd_0)
-newdir <- "SCRIPT_pipeline"
+samples <- read.csv(file = "/Users/mgj1343/Library/CloudStorage/OneDrive-NorthwesternUniversity/SBratchikov/FlowDensity/01_data/PASC/02_BAL_flow_cytometry/20220625_PASC_flow.csv", sep = ",")[, 1]
+samples <- samples[1:39]
+newdir <- "PASC_pipeline"
 dir.create(newdir)
-setwd("./SCRIPT_pipeline/")
-fcs_names <- dir(path = "/Users/mgj1343/Library/CloudStorage/OneDrive-NorthwesternUniversity/FCS Automatization data/data/", pattern = ".fcs$", full.names = FALSE, ignore.case = TRUE)
-for (i in fcs_names) {
+setwd("./PASC_pipeline/")
+# fcs_names <- dir(path = "/Users/mgj1343/Library/CloudStorage/OneDrive-NorthwesternUniversity/SBratchikov/FlowDensity/01_data/SCRIPT/2021_06", pattern = ".fcs$", full.names = FALSE, ignore.case = TRUE)
+
+for (i in samples) {
   newdir <- i
   dir.create(newdir)
   # setwd(paste0(cwd,'/',newdir))
   setwd(newdir)
-  fcs_test <- read.FCS(paste0("/Users/mgj1343/Library/CloudStorage/OneDrive-NorthwesternUniversity/FCS Automatization data/data/", i))
+  fcs_test <- read.FCS(paste0("/Users/mgj1343/Library/CloudStorage/OneDrive-NorthwesternUniversity/SBratchikov/FlowDensity/01_data/PASC/02_BAL_flow_cytometry/all_fcs/", i))
   ### singlets
   sngl <- flowDensity(fcs_test,
     channels = c("FSC-A", "FSC-H"), position = c(F, F),
     percentile = c(.99999, .99999), use.percentile = c(T, T),
-    ellip.gate = T, scale = .99
+    ellip.gate = T, scale = .8
   )
   bmp(
     file = "Singlets.bmp",
@@ -32,19 +35,18 @@ for (i in fcs_names) {
     paste0("total: ", nrow(sngl@flow.frame))
   ), bty = "n")
   dev.off()
-  ### cd45+
   ### logicle transformation
-  lgcl <- logicleTransform(w = 0.5, t = 262144, m = 4.5)
-  trans <- transformList(c("Qdot 655-A", "AmCyan-A"), lgcl)
-  after <- transform(sngl@flow.frame, trans)
-
-  cd45 <- flowDensity(after, channels = c("AmCyan-A", "Qdot 655-A"), position = c(T, NA), upper = c(F, NA))
+  df_colnames <- setdiff(df_allcolnames, c("Time", "FSC-A", "FSC-H", "FSC-W", "SSC-A", "SSC-H", "SSC-W"))
+  lgcl <- estimateLogicle(fcs_test,channels = df_colnames)
+  after <- transform(fcs_test,lgcl)
+  ### cd45+
+  cd45 <- flowDensity(after[sngl@index], channels = c("AmCyan-A", "Qdot 655-A"), position = c(T, NA), upper = c(F, NA))
   # not_cd45 <- flowDensity(after, channels=c("AmCyan-A", "Qdot 655-A"), position=c(F,NA),upper=c(F,NA))
   bmp(
     file = "CD45+.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("AmCyan-A", "Qdot 655-A"), main = "CD45+")
+  plotDens(after[sngl@index], c("AmCyan-A", "Qdot 655-A"), main = "CD45+")
   # lines(not_cd45@filter,type="l",col=2,lwd=4)
   lines(cd45@filter, type = "l")
   legend("topleft", legend = c(
@@ -54,15 +56,14 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 1)
   dev.off()
 
-  trans <- transformList(c("FITC-A", "FSC-A"), lgcl)
-  after <- transform(cd45@flow.frame, trans)
+
   ### Live singlet cells
-  live <- flowDensity(after, channels = c("FITC-A", "FSC-A"), position = c(F, NA), upper = c(NA, F))
+  live <- flowDensity(after[cd45@index], channels = c("FITC-A", "FSC-A"), position = c(F, NA), upper = c(NA, F))
   bmp(
     file = "Live.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("FITC-A", "FSC-A"), main = "Live")
+  plotDens(after[cd45@index], c("FITC-A", "FSC-A"), main = "Live")
   legend("topleft", legend = c(
     paste0("count: ", live@cell.count),
     paste0("frequency: ", round(live@proportion, digits = 2)),
@@ -72,16 +73,18 @@ for (i in fcs_names) {
   dev.off()
   ### cd3+
 
-  trans <- transformList(c("PE-A", "PE-Cy7-A"), lgcl)
-  after <- transform(live@flow.frame, trans)
-
-  cd3 <- flowDensity(after, channels = c("PE-A", "PE-Cy7-A"), position = c(T, F))
-  not_cd3 <- flowDensity(after, channels = c("PE-A", "PE-Cy7-A"), position = c(F, NA))
+  cd3 <- flowDensity(after[live@index], channels = c("PE-A", "PE-Cy7-A"), position = c(T, F))
+  ### getting gates thresholds for markers
+  cd3.gate <- deGate(after[live@index], channel = "PE-A")
+  cd206.gate <- deGate(after[live@index],channel = "PE-Cy7-A")
+  ### selecting the cd3 surrounding cells
+  not_cd3 <- notSubFrame(after[live@index], channels = c("PE-A", "PE-Cy7-A"),position = c(T,F),gates=c(cd3.gate,cd206.gate))
+  
   bmp(
     file = "CD3 T cells.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("PE-A", "PE-Cy7-A"), main = "CD3 T cells")
+  plotDens(after[live@index], c("PE-A", "PE-Cy7-A"), main = "CD3 T cells")
   lines(not_cd3@filter, type = "l", col = 2)
   lines(cd3@filter, type = "l")
   # lines(not_cd3@filter,type="l")
@@ -92,16 +95,14 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 1)
   dev.off()
   ### CD8 CD4
-  trans <- transformList(c("DAPI-A", "APC-A"), lgcl)
-  after <- transform(cd3@flow.frame, trans)
-  cd4 <- flowDensity(after, c("DAPI-A", "APC-A"), position = c(T, F))
-  cd8 <- flowDensity(after, c("DAPI-A", "APC-A"), position = c(F, T))
+  cd4 <- flowDensity(after[cd3@index], c("DAPI-A", "APC-A"), position = c(T, F))
+  cd8 <- flowDensity(after[cd3@index], c("DAPI-A", "APC-A"), position = c(F, T))
   # not_cd45 <- flowDensity(after, channels=c("AmCyan-A", "Qdot 655-A"), position=c(F,NA),upper=c(F,NA))
   bmp(
     file = "CD8_CD4.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("DAPI-A", "APC-A"), main = "CD8/CD4")
+  plotDens(after[cd3@index], c("DAPI-A", "APC-A"), main = "CD8/CD4")
   lines(cd8@filter, type = "l", col = 2)
   lines(cd4@filter, type = "l", col = 3)
   legend("topleft", legend = c(
@@ -116,16 +117,13 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 3)
   dev.off()
   ### tregs
-  trans <- transformList(c("Side Pop-A", "PE-Texas Red-A"), lgcl)
-  after <- transform(cd4@flow.frame, trans)
-
-  tregs <- flowDensity(after, channels = c("Side Pop-A", "PE-Texas Red-A"), position = c(T, F))
+  tregs <- flowDensity(after[cd4@index], channels = c("Side Pop-A", "PE-Texas Red-A"), position = c(T, F))
   # not_cd45 <- flowDensity(after, channels=c("AmCyan-A", "Qdot 655-A"), position=c(F,NA),upper=c(F,NA))
   bmp(
     file = "Tregs.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("Side Pop-A", "PE-Texas Red-A"), main = "Tregs")
+  plotDens(after[cd4@index], c("Side Pop-A", "PE-Texas Red-A"), main = "Tregs")
   # lines(not_cd45@filter,type="l",col=2,lwd=4)
   lines(tregs@filter, type = "l")
   legend("topleft", legend = c(
@@ -135,17 +133,14 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 1)
   dev.off()
   ### Neutrophils
-  trans <- transformList(c("Pacific Blue-A"), lgcl)
-  after <- transform(not_cd3@flow.frame, trans)
-
-  neutro <- flowDensity(after, channels = c("Qdot 655-A", "Pacific Blue-A"), position = c(T, NA))
-  not_neutro <- flowDensity(after, channels = c("Qdot 655-A", "Pacific Blue-A"), position = c(F, NA))
+  neutro <- flowDensity(after[not_cd3@index], channels = c("Qdot 655-A", "Pacific Blue-A"), position = c(T, NA))
+  not_neutro <- flowDensity(after[not_cd3@index], channels = c("Qdot 655-A", "Pacific Blue-A"), position = c(F, NA))
   bmp(
     file = "Neutrophils.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("Side Pop-A", "PE-Texas Red-A"), main = "Tregs")
-  plotDens(after, c("Qdot 655-A", "Pacific Blue-A"), main = "Neutrophils")
+  plotDens(after[not_cd3@index], c("Side Pop-A", "PE-Texas Red-A"), main = "Tregs")
+  plotDens(after[not_cd3@index], c("Qdot 655-A", "Pacific Blue-A"), main = "Neutrophils")
   # lines(not_cd45@filter,type="l",col=2,lwd=4)
   lines(neutro@filter, type = "l")
   lines(not_neutro@filter, type = "l")
@@ -156,16 +151,13 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 1)
   dev.off()
   ### Macrophages
-  trans <- transformList(c("APC-A"), lgcl)
-  after <- transform(not_neutro@flow.frame, trans)
-
-  macro <- flowDensity(after, channels = c("PE-Cy7-A", "APC-A"), position = c(T, NA))
-  not_macro <- flowDensity(after, channels = c("PE-Cy7-A", "APC-A"), position = c(F, NA))
+  macro <- flowDensity(after[not_neutro@index], channels = c("PE-Cy7-A", "APC-A"), position = c(T, NA))
+  not_macro <- flowDensity(after[not_neutro@index], channels = c("PE-Cy7-A", "APC-A"), position = c(F, NA))
   bmp(
     file = "Macrophages.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("PE-Cy7-A", "APC-A"), main = "Macrophages")
+  plotDens(after[not_neutro@index], c("PE-Cy7-A", "APC-A"), main = "Macrophages")
   lines(not_macro@filter, type = "l", col = 2)
   lines(macro@filter, type = "l")
   # lines(not_cd3@filter,type="l")
@@ -176,13 +168,13 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 1)
   dev.off()
   ### CD206High
-  cd206 <- flowDensity(macro, channels = c("PE-Cy7-A", "FSC-A"), position = c(T, NA))
-  not_cd206 <- flowDensity(macro, channels = c("PE-Cy7-A", "FSC-A"), position = c(F, NA), upper = c(F, NA))
+  cd206 <- flowDensity(after[macro@index], channels = c("PE-Cy7-A", "FSC-A"), position = c(T, NA))
+  not_cd206 <- flowDensity(after[macro@index], channels = c("PE-Cy7-A", "FSC-A"), position = c(F, NA), upper = c(F, NA))
   bmp(
     file = "CD206.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(macro, c("PE-Cy7-A", "FSC-A"), main = "CD206")
+  plotDens(after[macro@index], c("PE-Cy7-A", "FSC-A"), main = "CD206")
   lines(cd206@filter, type = "l")
   lines(not_cd206@filter, type = "l", col = 2)
 
@@ -193,17 +185,13 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 1)
   dev.off()
   ### Eosinophils
-
-  trans <- transformList(c("SSC-A"), lgcl)
-  after <- transform(not_macro@flow.frame, trans)
-
-  eosin <- flowDensity(after, channels = c("APC-A", "SSC-A"), position = c(NA, T))
-  not_eosin <- flowDensity(after, channels = c("APC-A", "SSC-A"), position = c(NA, F))
+  eosin <- flowDensity(after[not_macro@index], channels = c("APC-A", "SSC-A"), position = c(NA, T))
+  not_eosin <- flowDensity(after[not_macro@index], channels = c("APC-A", "SSC-A"), position = c(NA, F))
   bmp(
     file = "Eosinophils.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("APC-A", "SSC-A"), main = "Eosinophils")
+  plotDens(after[not_macro@index], c("APC-A", "SSC-A"), main = "Eosinophils")
   lines(not_eosin@filter, type = "l", col = 2)
   lines(eosin@filter, type = "l")
   # lines(not_neutro@filter,type="l")
@@ -214,17 +202,13 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 1)
   dev.off()
   ### NK cells
-
-  trans <- transformList(c("DAPI-A", "Side Pop-A"), lgcl)
-  after <- transform(not_eosin@flow.frame, trans)
-
-  nk <- flowDensity(after, channels = c("DAPI-A", "Side Pop-A"), position = c(F, T))
-  not_nk <- flowDensity(after, channels = c("DAPI-A", "Side Pop-A"), position = c(NA, F))
+  nk <- flowDensity(after[not_eosin@index], channels = c("DAPI-A", "Side Pop-A"), position = c(F, T))
+  not_nk <- flowDensity(after[not_eosin@index], channels = c("DAPI-A", "Side Pop-A"), position = c(NA, F))
   bmp(
     file = "NK cells.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(after, c("DAPI-A", "Side Pop-A"), main = "NK cells")
+  plotDens(after[not_eosin@index], c("DAPI-A", "Side Pop-A"), main = "NK cells")
   lines(not_nk@filter, type = "l", col = 2)
   lines(nk@filter, type = "l")
   # lines(not_neutro@filter,type="l")
@@ -235,13 +219,13 @@ for (i in fcs_names) {
   ), bty = "n", text.col = 1)
   dev.off()
   ### Monocytes
-  mono <- flowDensity(not_nk@flow.frame, channels = c("DAPI-A", "APC-A"), position = c(NA, T))
-  not_mono <- flowDensity(after, channels = c("DAPI-A", "APC-A"), position = c(NA, F))
+  mono <- flowDensity(after[not_nk@index], channels = c("DAPI-A", "APC-A"), position = c(NA, T))
+  not_mono <- flowDensity(after[not_nk@index], channels = c("DAPI-A", "APC-A"), position = c(NA, F))
   bmp(
     file = "Monocytes.bmp",
     width = 6, height = 4, units = "in", res = 100
   )
-  plotDens(not_nk, c("DAPI-A", "APC-A"), main = "Monocytes")
+  plotDens(after[not_nk@index], c("DAPI-A", "APC-A"), main = "Monocytes")
   # lines(not_cd45@filter,type="l",col=2,lwd=4)
   lines(nk@filter, type = "l")
   # lines(not_neutro@filter,type="l")
@@ -254,24 +238,29 @@ for (i in fcs_names) {
   ### creating dataframe with info on percentages and counts
   Cell <- c(
     "Singlets", "CD45", "Live", "CD3+", "CD3-", "CD8 T cells", "CD4 T cells", "Tregs", "Neutrophils", "Not Neutrophils", "Marophages",
-    "Not Macrophages", "CD206 high macrophages", "CD206 low macrophages", "Eosinophils", "NK cells", "Not NK", "Monocytes"
+    "Not Macrophages", "CD206 high macrophages", "CD206 low macrophages", "Eosinophils", "NK cells", "Not NK", "Monocytes", "B and plasma cells"
   )
   Cell_count <- c(
     sngl@cell.count, cd45@cell.count, live@cell.count, cd3@cell.count, not_cd3@cell.count,
     cd8@cell.count, cd4@cell.count, tregs@cell.count, neutro@cell.count, not_neutro@cell.count,
     macro@cell.count, not_macro@cell.count, cd206@cell.count, not_cd206@cell.count,
-    eosin@cell.count, nk@cell.count, not_nk@cell.count, mono@cell.count
+    eosin@cell.count, nk@cell.count, not_nk@cell.count, mono@cell.count, not_mono@cell.count
   )
   Cell_parent_percentage <- c(
-    sngl@proportion, cd45@proportion, live@proportion, cd3@proportion, not_cd3@proportion,
+    sngl@proportion, cd45@proportion, live@proportion, cd3@proportion, not_cd3@proportion ,
     cd8@proportion, cd4@proportion, tregs@proportion, neutro@proportion, not_neutro@proportion,
     macro@proportion, not_macro@proportion, cd206@proportion, not_cd206@proportion,
-    eosin@proportion, nk@proportion, not_nk@proportion, mono@proportion
+    eosin@proportion, nk@proportion, not_nk@proportion, mono@proportion, not_mono@proportion
   )
-  Sample <- c("20210120_1463-BAL-00_001.fcs")
-
-  df <- data.frame(Cell, Cell_count, Cell_parent_percentage, Sample)
+  Cell_abs_percentage <- c(
+    NA, NA, 1, (cd3@cell.count / live@cell.count) * 100, (not_cd3@cell.count / live@cell.count) * 100,
+    (cd8@cell.count / live@cell.count) * 100, (cd4@cell.count / live@cell.count) * 100, (tregs@cell.count / live@cell.count) * 100, (neutro@cell.count / live@cell.count) * 100, (not_neutro@cell.count / live@cell.count) * 100,
+    (macro@cell.count / live@cell.count) * 100, (not_macro@cell.count / live@cell.count) * 100, (cd206@cell.count / live@cell.count) * 100, (not_cd206@cell.count / live@cell.count) * 100,
+    (eosin@cell.count / live@cell.count) * 100, (nk@cell.count / live@cell.count) * 100, (not_nk@cell.count / live@cell.count) * 100, (mono@cell.count / live@cell.count) * 100, (not_mono@cell.count / live@cell.count) * 100
+  )
+  Sample <- i
+  df <- data.frame(Cell, Cell_count, Cell_parent_percentage, Cell_abs_percentage, Sample)
   write.csv(df, paste0(i, ".csv"), row.names = FALSE)
-  setwd(paste0(cwd_0, "/SCRIPT_pipeline"))
+  setwd(paste0(cwd_0, "/PASC_pipeline"))
 }
 setwd(cwd_0)
