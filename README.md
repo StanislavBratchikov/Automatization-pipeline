@@ -14,6 +14,8 @@ __Challenges__
 - [ ] Unable to sort files with 1e7 cells and more (not enough cache)
 - [ ] Algorithm fails to stably identify populations in random fcs file
 
+## Motivation 
+This project would allow performing gatings of fcs files in automized fashion. Currently all gatings are done manually, which can prove to be time consuming task.
 ## Intro
 
 Pipeline was inspired by  [this paper](https://pubmed.ncbi.nlm.nih.gov/25378466/)
