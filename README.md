@@ -5,11 +5,13 @@ in fcs files.
 ## Current updates and challanges 
 
 __Updates__
+- [x] Fixed bug with subseting populations from parent populations by index
 - [x] Modified logical transformation for clearer use
 - [x] CSV report on identified cells frequencies added for further analysis
 - [x] Loop added to perform whole fcs folder analysis
 
 __Challenges__
+- [ ] Logicle transformation in flowCore differs from the flowJo version
 - [ ] The smaller population the harder it is to gate it
 - [ ] Unable to sort files with 1e7 cells and more (not enough cache)
 - [ ] Algorithm fails to stably identify populations in random fcs file
